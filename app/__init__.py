@@ -1,26 +1,30 @@
+import os
 from flask import Flask
 from .learning_logs import learning_logs_bp
 from .auth import auth_bp
 from .main import main_bp
-from config import config 
+from config import config
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 # 然后根据自己的需要来create_app('development')之类的得到app，这样的一个app是自带了一整套运行用的插件以及合适的配置的，就可以方便地让app.run了。
-def create_app(config_mode):
+def create_app(config_name):
     app = Flask(__name__)
-    app.config.from_object(config[config_mode])
 
+    app.config.from_object(config[config_name])
     # from yourapplication.model import db
-    
-    # db.init_app(app)
 
+    app.config['SECRET_KEY'] =  os.getenv('SECRET_KEY')
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+
+    db.init_app(app)
     # from yourapplication.views.admin import admin
     # from yourapplication.views.frontend import frontend
     # app.register_blueprint(admin)
-    # app.register_blueprint(frontend)
     app.register_blueprint(learning_logs_bp, url_prefix='/learning_logs')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
-    # app.register_blueprint(main_bp, url_prefix='/home')
     return app
 
 
