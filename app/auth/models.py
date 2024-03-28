@@ -1,7 +1,13 @@
-from . import db
+from sqlalchemy import create_engine, Column, Integer, String
+import os
+engine = create_engine(os.getenv('DATABASE_URL'), echo=True)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+
+class Dog(Base):
+   __tablename__ = 'dogs'
+   id = Column(Integer, primary_key=True)
+   name = Column(String)
+
+Base.metadata.create_all(engine)
