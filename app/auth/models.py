@@ -1,16 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String
-import os
+from app import db
 
-engine = create_engine(os.getenv('DATABASE_URL'), echo=True)
-
-from sqlalchemy.ext.declarative import declarative_base
-Base = declarative_base()
-
-class User(Base):
-   __tablename__ = 'users'
-   id = Column(Integer, primary_key=True)
-   name = Column(String)
-   email = Column(String, unique=True)
-   password = Column(String)
-
-Base.metadata.create_all(engine)
+class Movie(db.Model):  # 表名将会是 movie
+    id = db.Column(db.Integer, primary_key=True)  # 主键
+    title = db.Column(db.String(60))  # 电影标题
+    year = db.Column(db.String(4))  # 电影年份
