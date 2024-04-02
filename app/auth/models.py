@@ -1,6 +1,8 @@
 from app import db
 
-class Movie(db.Model):  # 表名将会是 movie
-    id = db.Column(db.Integer, primary_key=True)  # 主键
-    title = db.Column(db.String(60))  # 电影标题
-    year = db.Column(db.String(4))  # 电影年份
+class User(db.Model):  
+    id = db.Column(db.Integer, primary_key=True)  
+    name = db.Column(db.String(20)) 
+    email = db.Column(db.String(50), nullable=False, unique=True)
+    des = db.Column(db.String, nullable=True)
+

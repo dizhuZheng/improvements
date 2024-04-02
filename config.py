@@ -8,13 +8,13 @@ class Config:
       raise ValueError("No SECRET_KEY set for Flask application")
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     
-    # @property
-    # def DATABASE_URI(self):  # Note: all caps
-    #     return f"mysql://user@{self.DB_SERVER}/foo"
+    @property
+    def DATABASE_URI(self):  # Note: all caps
+        return f"mysql://user@{self.DB_SERVER}/foo"
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # SQLALCHEMY_DATABASE_URI = os.getenv("")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     # prefix + os.path.join(basedir, 'data-dev.db')
 
 class TestingConfig(Config):
