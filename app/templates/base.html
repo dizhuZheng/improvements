@@ -5,28 +5,24 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Flask Auth Example</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <title>Authentication</title>
 </head>
 
 <body>
-    <h1>Hello Totoro!</h1><img src="http://helloflask.com/totoro.gif">
+    <img alt="Avatar" class="avatar" src="{{ url_for('static', filename='/images/avatar.png') }}">
     <section class="hero is-primary is-fullheight">
         <div class="hero-head">
             <nav class="navbar">
                 <div class="container">
                     <div id="navbarMenuHeroA" class="navbar-menu">
-                        <!-- <div class="navbar-end">
-                             <a href="{{ url_for('') }}" class="navbar-item">
-                                Login -->
-                            <!-- </a> -->
-                            <!-- <a href="{{ url_for('') }}" class="navbar-item">
-                                Sign Up
+                        <div class="navbar-end">
+                             <a href="{{ url_for('auth_bp.login') }}" class="navbar-item">
+                                Login 
                             </a>
-                            <a href="{{ url_for('') }}" class="navbar-item">
-                                Logout -->
-                            <!-- </a> -->
-                        <!-- </div>  -->
+                            <a href="{{ url_for('auth_bp.signup') }}" class="navbar-item">
+                                Sign Up
+                            </a> 
+                        </div> 
                     </div>
                 </div>
             </nav>

@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if current_user.is_authenticated %}
-  Hi {{ current_user.name }}!
-{% endif %}
+  {% if current_user.is_authenticated %}
+    <h1>heeello, {{ current_user }}</h1>
+    <a href="{{ url_for('auth_bp.logout') }}" >Logout </a>
+  {% else %}
+    <h1>You are not logged in</h1>
+  {% endif %}
 {% endblock %}
