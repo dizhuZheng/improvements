@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    FLASK_ADMIN_SWATCH = 'journal'
     SECRET_KEY = os.environ.get("SECRET_KEY")
     if not SECRET_KEY:
       raise ValueError("No SECRET_KEY set for Flask application")
@@ -15,6 +16,8 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    # set optional bootswatch theme
+    FLASK_ADMIN_SWATCH = 'journal'
     # prefix + os.path.join(basedir, 'data-dev.db')
 
 class TestingConfig(Config):

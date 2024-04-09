@@ -3,9 +3,13 @@ from flask import Flask, render_template
 from .learning_logs import learning_logs_bp
 from .auth import auth_bp
 from config import config
+from flask_admin import Admin
 from .extensions import db, migrate, login_manager
-from .auth.models import User
+from .auth.models import User, Role
 from dotenv import load_dotenv
+from flask_admin.contrib.sqla import ModelView
+from .auth.views import UserAdmin, RoleAdmin
+
 load_dotenv()
 
 def page_not_found(e):
@@ -22,6 +26,9 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     # login_manager.init_app(app)
+    admin = Admin(app, name='Daily Improvement', template_mode='bootstrap3')
+    admin.add_view(UserAdmin(User, db.session))
+    admin.add_view(RoleAdmin(Role, db.session))
     with app.app_context():
         db.create_all()
     app.register_blueprint(learning_logs_bp, url_prefix='/learning_logs')

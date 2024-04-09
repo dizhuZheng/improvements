@@ -1,8 +1,8 @@
-"""add user
+"""relate roles to user
 
-Revision ID: bc294e7cfb63
-Revises: 
-Create Date: 2024-04-02 13:56:07.279840
+Revision ID: a28e2020964f
+Revises: 43e82bbc3cd4
+Create Date: 2024-04-09 12:23:16.747565
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bc294e7cfb63'
-down_revision = None
+revision = 'a28e2020964f'
+down_revision = '43e82bbc3cd4'
 branch_labels = None
 depends_on = None
 
