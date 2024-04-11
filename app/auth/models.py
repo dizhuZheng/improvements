@@ -10,24 +10,36 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(50), nullable=False, unique=True)
     password_hash = db.Column(db.String(100), nullable=False)
     active = db.Column(db.Boolean())
-    roles = db.relationship('Role', back_populates="user", cascade="all, delete")
+    roles = db.relationship('Role', back_populates="user")
+
+    def __init__(self):
+        self._is_active = True
+        self._is_anoymous = False
+    
+    @property
+    def is_active(self):
+        return self._is_active
+
+    @is_active.setter
+    def is_active(self, val):
+        self._is_active = val
 
     @property
-    def name(self):
-        return self.name
-    
-    @name.setter
-    def name(self, value):
-        self.name = value
-    
+    def is_anoymous(self):
+        return self._is_anoymous
+
+    @is_anoymous.setter
+    def is_anoymous(self, val):
+        self._is_anoymous = val
+
     def set_password(self, password):  
         self.password_hash = generate_password_hash(password)  
 
     def validate_password(self, password):  
-        return check_password_hash(self.password_hash, password) 
+        return check_password_hash(self.password_hash, password)  
     
     def __repr__(self):
-        return '<User %r>' % self.username
+        return self.name
     
 
 class Role(db.Model):
@@ -37,9 +49,5 @@ class Role(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship("User", back_populates="roles")
 
-# class UserRoles(db.Model):
-#     __tablename__ = 'user_roles'
-#     id = db.Column(db.Integer(), primary_key=True)
-#     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-#     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
-
+    def __repr__(self):
+        return self.name

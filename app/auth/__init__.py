@@ -1,11 +1,21 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
-# from forms import LoginForm
+from .forms import LoginForm
 import click
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required, current_user
-from app.extensions import db
+from flask_login import login_user, logout_user, login_required, current_user, UserMixin
+from app.extensions import login_manager
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='/templates', static_folder='/static', static_url_path='/assets')
+
+
+class User(UserMixin):
+    pass
+
+
+@login_manager.user_loader
+def user_loader(id):
+    return User.query.get(int(id))
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,25 +63,3 @@ def signup():
 def logout():
     logout_user()
     return redirect(url_for('auth_bp.login'))
-
-
-@auth_bp.cli.command()
-@click.option('--username', prompt=True, help='The username used to login.')
-@click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help='The password used to login.')
-def admin(username, password):
-    """Create user."""
-    db.create_all()
-
-    user = User.query.first()
-    if user is not None:
-        click.echo('Updating user...')
-        user.username = username
-        user.set_password(password)  # 设置密码
-    else:
-        click.echo('Creating user...')
-        user = User(username=username, name='Admin')
-        user.set_password(password)  # 设置密码
-        db.session.add(user)
-
-    db.session.commit()  # 提交数据库会话
-    click.echo('Done.')

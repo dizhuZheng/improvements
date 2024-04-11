@@ -1,7 +1,14 @@
-# <form method="post">  <!-- 指定提交方法为 POST -->
-#     <label for="name">名字</label>
-#     <input type="text" name="name" id="name"><br>  
-#     <label for="occupation">职业</label>
-#     <input type="text" name="occupation" id="occupation"><br>  
-#     <input type="submit" name="submit" value="登录">  
-# </form>
+from wtforms import fields, validators
+from flask_wtf import FlaskForm, CSRFProtect
+from werkzeug.security import generate_password_hash, check_password_hash
+from wtforms.validators import DataRequired
+
+class LoginForm(FlaskForm):
+    login = fields.StringField(label=u'管理员账号', validators=[DataRequired()])
+    password = fields.PasswordField(label=u'密码', validators=[DataRequired()])
+    submit = fields.SubmitField('Submit')
+
+
+    
+
+    

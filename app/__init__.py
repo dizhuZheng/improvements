@@ -9,6 +9,8 @@ from .auth.models import User, Role
 from dotenv import load_dotenv
 from flask_admin.contrib.sqla import ModelView
 from .auth.views import UserAdmin, RoleAdmin
+from flask_wtf import CSRFProtect
+from flask_bootstrap import Bootstrap5
 
 load_dotenv()
 
@@ -23,12 +25,14 @@ def create_app(config_name=None):
         config_name = os.getenv('FLASK_ENV', 'development')
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    bootstrap = Bootstrap5(app)
+    csrf = CSRFProtect(app)
     db.init_app(app)
     migrate.init_app(app, db)
-    # login_manager.init_app(app)
+    login_manager.init_app(app)
     admin = Admin(app, name='Daily Improvement', template_mode='bootstrap3')
-    admin.add_view(UserAdmin(User, db.session))
-    admin.add_view(RoleAdmin(Role, db.session))
+    admin.add_view(UserAdmin(User, db.session, name='Users', category='users'))
+    admin.add_view(RoleAdmin(Role, db.session, name='Roles', category='roles'))
     with app.app_context():
         db.create_all()
     app.register_blueprint(learning_logs_bp, url_prefix='/learning_logs')
@@ -36,3 +40,8 @@ def create_app(config_name=None):
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, internal_server_error)
     return app
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
