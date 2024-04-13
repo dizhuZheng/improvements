@@ -9,28 +9,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(20), unique=True) 
     email = db.Column(db.String(50), nullable=False, unique=True)
     password_hash = db.Column(db.String(100), nullable=False)
-    active = db.Column(db.Boolean())
     roles = db.relationship('Role', back_populates="user")
-
-    def __init__(self):
-        self._is_active = True
-        self._is_anoymous = False
-    
-    @property
-    def is_active(self):
-        return self._is_active
-
-    @is_active.setter
-    def is_active(self, val):
-        self._is_active = val
-
-    @property
-    def is_anoymous(self):
-        return self._is_anoymous
-
-    @is_anoymous.setter
-    def is_anoymous(self, val):
-        self._is_anoymous = val
 
     def set_password(self, password):  
         self.password_hash = generate_password_hash(password)  

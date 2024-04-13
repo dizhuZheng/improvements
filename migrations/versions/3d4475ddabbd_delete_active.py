@@ -1,8 +1,8 @@
-"""name disapperared, add it back
+"""delete active
 
-Revision ID: 1518b8afaaf1
+Revision ID: 3d4475ddabbd
 Revises: 
-Create Date: 2024-04-11 15:33:47.584039
+Create Date: 2024-04-11 16:16:19.517858
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1518b8afaaf1'
+revision = '3d4475ddabbd'
 down_revision = None
 branch_labels = None
 depends_on = None
