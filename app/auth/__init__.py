@@ -1,69 +1,53 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 from .forms import LoginForm
-import click
-from ..extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required, current_user, UserMixin
-from app.extensions import login_manager
+from app.auth.models import User
+from flask_login import login_user, logout_user, login_required, current_user
+from ..extensions import login_manager
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
 
-# @login_manager.request_loader
-# def request_loader(request):
-#     email = request.form.get('email')
-#     if email not in users:
-#         return
 
-#     user = User()
-#     user.id = email
-#     return user
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return 'Unauthorized', 401
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return 'Unauthorized', 401
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('profile.html'))
     form = LoginForm()
-    return render_template('login.html', form=form)
+    message = ""
     if form.validate_on_submit():
-        login_user(current_user)
-        flash('Logged in successfully.')
-        # if admin:
-        #     if username == admin.username and admin.validate_password(password):
-        #         login_user(admin, remember)
-        #         flash('Welcome back.', 'info')
-        #         return redirect()
-        #     flash('Invalid username or password.', 'warning')  
-        return abort(400)
-    return render_template('profile.html', form=form)
+        name = form.name.data
+        password = form.password.data
+        user = User.query.filter_by(name=name).first()
+        if user:
+          if user.password_hash == password:
+              login_user(user)
+              message = "haha"
+              return redirect(url_for("auth_bp.protected"))
+          else:
+              message = "Ah-oh, your password is wrong."
+        else:
+            message = 'No exsting user.'
+    return render_template("login.html", form=form, message=message)
 
 
-
-# # @auth_bp.route('/login', methods=['GET', 'POST'])
-# # def login():
-# #     if request.method == 'GET':
-# #         return '''
-# #                <form action='login' method='POST'>
-# #                 <input type='text' name='email' id='email' placeholder='email'/>
-# #                 <input type='password' name='password' id='password' placeholder='password'/>
-# #                 <input type='submit' name='submit'/>
-# #                </form>
-# #                '''
-
-# #     email = request.form['email']
-# #     if email in users and flask.request.form['password'] == users[email]['password']:
-# #         user = User()
-# #         user.id = email
-# #         flask_login.login_user(user)
-# #         return flask.redirect(flask.url_for('protected'))
-
-# #     return 'Bad login'
-
-
-# @app.route('/protected')
-# @flask_login.login_required
-# def protected():
-#     return 'Logged in as: ' + flask_login.current_user.id
-
+@auth_bp.route('/protected')
+@login_required
+def protected():
+    message = "success!"
+    return render_template('profile.html', current_user=current_user, message=message)
 # @auth_bp.route('/signup', methods=['GET', 'POST'])
 # def signup():
 #     if request.method == 'POST':
@@ -92,6 +76,7 @@ def logout():
     return 'Logged out'
 
 
-# @login_manager.unauthorized_handler
-# def unauthorized_handler():
-#     return 'Unauthorized', 401
+@auth_bp.route("/settings")
+@login_required
+def settings():
+    pass
