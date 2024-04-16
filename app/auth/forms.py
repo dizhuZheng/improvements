@@ -1,8 +1,6 @@
 from wtforms import fields
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Length, ValidationError
-from ..extensions import db
-from .models import User
 
 class LoginForm(FlaskForm):
     name = fields.StringField(label='name', validators=[DataRequired()])

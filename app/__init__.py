@@ -7,7 +7,7 @@ from flask_admin import Admin
 from .extensions import db, migrate, login_manager, csrf
 from app.auth.models import User, Role
 from dotenv import load_dotenv
-from .auth.views import UserAdmin, RoleAdmin, AdminModelView
+from .auth.views import UserAdmin, RoleAdmin
 from flask import render_template
 from app.extensions import login_manager, db, bootstrap, bcrypt
 
