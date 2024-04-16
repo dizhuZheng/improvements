@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% from 'bootstrap5/form.html' import render_form %}
-
 {% block content %}
+{% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
 <div class="column is-4 is-offset-4">
-    <p class="pt-5"><strong>{{ message }}</strong></p>
     <h3 class="title">Login</h3>
     <div class="box">
         <form method="POST" action="">

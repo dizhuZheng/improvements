@@ -1,7 +1,8 @@
-from wtforms import fields, validators
-from flask_wtf import FlaskForm, CSRFProtect
-from werkzeug.security import generate_password_hash, check_password_hash
-from wtforms.validators import DataRequired
+from wtforms import fields
+from flask_wtf import FlaskForm
+from wtforms.validators import DataRequired, Length, ValidationError
+from ..extensions import db
+from .models import User
 
 class LoginForm(FlaskForm):
     name = fields.StringField(label='name', validators=[DataRequired()])
@@ -9,6 +10,8 @@ class LoginForm(FlaskForm):
     submit = fields.SubmitField('Submit')
 
 
-    
-
-    
+class RegisterForm(FlaskForm):
+    name = fields.StringField(label='name', validators=[DataRequired(), Length(4, 40)])
+    password = fields.PasswordField(label='password', validators=[DataRequired()])
+    email = fields.StringField(label='email', validators=[DataRequired()])
+    submit = fields.SubmitField('Submit')

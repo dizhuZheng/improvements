@@ -7,9 +7,9 @@ from flask_admin import Admin
 from .extensions import db, migrate, login_manager, csrf
 from app.auth.models import User, Role
 from dotenv import load_dotenv
-from .auth.views import UserAdmin, RoleAdmin
+from .auth.views import UserAdmin, RoleAdmin, AdminModelView
 from flask import render_template
-from app.extensions import login_manager, db, bootstrap
+from app.extensions import login_manager, db, bootstrap, bcrypt
 
 load_dotenv()
 
@@ -34,6 +34,7 @@ def register_extensions(app):
     db.init_app(app)
     bootstrap.init_app(app)
     csrf.init_app(app)
+    bcrypt.init_app
     migrate.init_app(app, db)
     login_manager.init_app(app)
     app.register_blueprint(learning_logs_bp, url_prefix='/learning_logs')
@@ -42,4 +43,4 @@ def register_extensions(app):
     app.register_error_handler(500, internal_server_error)
     admin = Admin(app, name='Daily Improvement', template_mode='bootstrap3')
     admin.add_view(UserAdmin(User, db.session, name='Users', category='users'))
-    admin.add_view(RoleAdmin(Role, db.session, name='Roles', category='roles'))
+    admin.add_view(RoleAdmin(Role, db.session, name='Roles', category='users'))
