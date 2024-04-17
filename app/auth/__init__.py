@@ -3,6 +3,7 @@ from .forms import LoginForm, RegisterForm
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user
 from ..extensions import login_manager, db, bcrypt
+from datetime import timedelta
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
 
@@ -26,11 +27,15 @@ def login():
         password = form.password.data
         user = User.query.filter_by(name=name).first()
         if user:
-          if bcrypt.check_password_hash(user.password_hash, password):
-              login_user(user)
-              return redirect(url_for("auth_bp.protected"))
-          else:
-              error = "Ah-oh, your password is wrong."
+            if bcrypt.check_password_hash(user.password_hash, password):
+                if form.remember.data:
+                    flash("you are remembered for 20 mins")
+                    login_user(user, remember=True, duration=timedelta(minutes=20))
+                else:
+                    login_user(user)           
+                return redirect(url_for("auth_bp.protected"))
+            else:
+                error = "Ah-oh, your password is wrong."
         else:
             error = 'No exsting user.'
     return render_template("login.html", form=form, error=error)
@@ -53,7 +58,7 @@ def signup():
         email = form.email.data
         info = User.query.filter_by(email=email).first()
         if user or info:
-            error = 'user already exsited.'
+            error = 'user already exsited. Do you want to log in instead?'
         else:
             password = form.password.data
             email = form.email.data
