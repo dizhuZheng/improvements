@@ -91,3 +91,8 @@ def errors():
 @login_required
 def settings():
     pass
+
+
+@auth_bp.route("/lost_and_find")
+def account_recovery():
+    pass
