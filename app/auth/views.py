@@ -5,5 +5,5 @@ class UserAdmin(ModelView):
     column_labels = {'name': 'Username', 'email': 'Email Address', 'roles': 'Role', 'active':'Active'}
     
 class RoleAdmin(ModelView):
-    column_list = ('name')
+    column_list = ('name', 'users')
     # column_searchable_list = ['name']
