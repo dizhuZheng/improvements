@@ -7,7 +7,7 @@ from flask_admin import Admin
 from .extensions import db, migrate, login_manager, csrf
 from app.auth.models import User, Role
 from dotenv import load_dotenv
-from .auth.views import UserAdmin, RoleAdmin
+from .auth.views import UserAdmin, RoleAdmin, MyView, MyHomeView
 from flask import render_template
 from app.extensions import login_manager, db, bootstrap, bcrypt
 
@@ -41,6 +41,7 @@ def register_extensions(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, internal_server_error)
-    admin = Admin(app, name='Daily Improvement', template_mode='bootstrap3')
+    admin = Admin(app, name='Daily Improvement', url="/admin", template_mode='bootstrap3')
     admin.add_view(UserAdmin(User, db.session, name='Users', category='users'))
     admin.add_view(RoleAdmin(Role, db.session, name='Roles', category='users'))
+    admin.add_view(MyView(name='My View', menu_icon_type='glyph', menu_icon_value='glyphicon-home'))

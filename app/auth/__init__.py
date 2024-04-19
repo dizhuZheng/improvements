@@ -26,10 +26,12 @@ def login():
         password = form.password.data
         user = User.query.filter_by(name=name).first()
         if user:
-          if bcrypt.check_password_hash(user.password_hash, password):
-              login_user(user)
-              return redirect(url_for("auth_bp.protected"))
-          else:
+            if bcrypt.check_password_hash(user.password_hash, password):
+                db.session.add(user)
+                db.session.commit()
+                login_user(user, remember=True)
+                return redirect(url_for("auth_bp.protected"))
+            else:
               error = "Ah-oh, your password is wrong."
         else:
             error = 'No exsting user.'
