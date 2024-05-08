@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template
 from .learning_logs import learning_logs_bp
 from .auth import auth_bp
+from .main import main_bp
 from config import config
 from flask_admin import Admin
 from .extensions import db, migrate, login_manager, csrf
@@ -37,6 +38,7 @@ def register_extensions(app):
     bcrypt.init_app
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    app.register_blueprint(main_bp, url_prefix='/')
     app.register_blueprint(learning_logs_bp, url_prefix='/learning_logs')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_error_handler(404, page_not_found)
