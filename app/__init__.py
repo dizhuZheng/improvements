@@ -10,7 +10,7 @@ from app.auth.models import User, Role
 from dotenv import load_dotenv
 from .auth.views import UserAdmin, RoleAdmin, MyView, MyHomeView
 from flask import render_template
-from app.extensions import login_manager, db, bootstrap, bcrypt
+from app.extensions import login_manager, db, bootstrap, bcrypt, mail
 
 load_dotenv()
 
@@ -35,6 +35,7 @@ def register_extensions(app):
     db.init_app(app)
     bootstrap.init_app(app)
     csrf.init_app(app)
+    mail.init_app(app)
     bcrypt.init_app
     migrate.init_app(app, db)
     login_manager.init_app(app)
@@ -44,6 +45,7 @@ def register_extensions(app):
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, internal_server_error)
     admin = Admin(app, name='Daily Improvement', url="/admin", template_mode='bootstrap3')
-    admin.add_view(UserAdmin(User, db.session, name='Users', category='users'))
-    admin.add_view(RoleAdmin(Role, db.session, name='Roles', category='users'))
+    admin.add_view(UserAdmin(User, db.session, name='All users', category='users'))
+    admin.add_view(RoleAdmin(Role, db.session, name='Manage roles', category='users'))
     admin.add_view(MyView(name='My View', menu_icon_type='glyph', menu_icon_value='glyphicon-home'))
+    # admin.add_sub_category(name='child', parent_name='My View')
