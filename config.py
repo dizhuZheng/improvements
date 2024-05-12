@@ -22,7 +22,6 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    API_URL = os.getenv("API_URL")
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 class ProductionConfig(Config):

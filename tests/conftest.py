@@ -1,13 +1,12 @@
 import pytest
-from app import create_app, db
+from app import create_app
 from app.auth.models import User, Role
-from app.extensions import bcrypt
+from app.extensions import bcrypt, csrf
 
-# Fixtures 
-
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def test_client():
     flask_app = create_app()
+    csrf.init_app(flask_app)
     flask_app.config.update({
         "TESTING": True
     })
@@ -15,8 +14,7 @@ def test_client():
     with flask_app.test_client() as testing_client:
         # Establish an application context
         with flask_app.app_context():
-            assert flask_app.config["TESTING"] == True
-            yield testing_client  # this is where the testing happens!
+            yield testing_client  
 
 
 @pytest.fixture(scope='module')
@@ -29,6 +27,8 @@ def new_user():
 def new_role():
     role = Role(name='VIP')
     return role
+
+
 # @pytest.fixture()
 # def runner(app):
 #     return app.test_cli_runner()
