@@ -14,3 +14,9 @@ class RegisterForm(FlaskForm):
     password = fields.PasswordField(label='password', validators=[DataRequired()])
     email = fields.EmailField(label='email', validators=[DataRequired()])
     submit = fields.SubmitField('Submit')
+
+
+class DemoForm(FlaskForm):
+    title = fields.StringField(label='title', validators=[DataRequired(), Length(3, 40)])
+    year = fields.TimeField(label='year', validators=[DataRequired(), Length(3, 40)])
+    submit = fields.SubmitField('Submit')

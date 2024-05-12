@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort
-from .forms import LoginForm, RegisterForm
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from .forms import LoginForm, RegisterForm, DemoForm
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user
-from ..extensions import login_manager, db, bcrypt
+from ..extensions import login_manager, db, bcrypt, mail
+from flask_mail import Message
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
-
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
@@ -15,6 +15,16 @@ def unauthorized_handler():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+@auth_bp.route('/test', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':  
+            name = request.form.get('name')  
+            occupation = request.form.get('occupation')
+            flash('Item created.')  
+            return redirect(url_for('main_bp.main'))  
+    return render_template("test.html")
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -49,16 +59,15 @@ def protected():
 def signup():
     form = RegisterForm()
     error = ""
-    if form.validate_on_submit():
-        name = form.name.data
-        user = User.query.filter_by(name=name).first()
-        email = form.email.data
-        info = User.query.filter_by(email=email).first()
-        if user or info:
-            error = 'user already exsited.'
-        else:
-            password = form.password.data
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            name = form.name.data
+            user = User.query.filter_by(name=name).first()
             email = form.email.data
+            msg = Message("Hello",
+                  sender="dizhu210@gmail.com",
+                  recipients=[email])
+            mail.send(msg)
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
             new_user = User(email=email, name=name, password_hash=hashed_password)
             db.session.add(new_user)

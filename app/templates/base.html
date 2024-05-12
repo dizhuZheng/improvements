@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Authentication</title>
+    <title>Daily Improvement {{ name }}</title>
 </head>
-
 <body>
     <img alt="Avatar" class="avatar" src="{{ url_for('static', filename='/images/avatar.png') }}">
     <section class="hero is-primary is-fullheight">
@@ -15,11 +13,12 @@
             <nav class="navbar">
                 <div class="container">
                     <div id="navbarMenuHeroA" class="navbar-menu">
-                        <div class="navbar-end">
-                             <a href="{{ url_for('auth_bp.login') }}" class="navbar-item">
-                                Login 
-                            </a>
-                        </div> 
+                        {% for item in items %}
+                            <div class="navbar-end">
+                                {{ item }}
+                            </div>
+                        {% endfor %}
+                    </div>
                     </div>
                 </div>
             </nav>
@@ -41,5 +40,4 @@
         </div>
     </section>
 </body>
-
 </html>
