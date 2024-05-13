@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from .forms import LoginForm, RegisterForm, DemoForm
+from .forms import LoginForm, RegisterForm, SettingForm
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user
 from ..extensions import login_manager, db, bcrypt, mail
@@ -59,15 +59,19 @@ def protected():
 def signup():
     form = RegisterForm()
     error = ""
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            name = form.name.data
-            user = User.query.filter_by(name=name).first()
-            email = form.email.data
-            msg = Message("Hello",
-                  sender="dizhu210@gmail.com",
-                  recipients=[email])
-            mail.send(msg)
+    if form.validate_on_submit():
+        name = form.name.data
+        user = User.query.filter_by(name=name).first()
+        email = form.email.data
+        info = User.query.filter_by(email=email).first()
+        if user or info :
+            error = "sorry, user existed already."
+        else:
+            password = form.password.data
+            # msg = Message("Hello",
+            #     sender="dizhu210@gmail.com",
+            #     recipients=[email])
+            # mail.send(msg)
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
             new_user = User(email=email, name=name, password_hash=hashed_password)
             db.session.add(new_user)
@@ -97,7 +101,27 @@ def errors():
 @auth_bp.route("/settings")
 @login_required
 def settings():
-    pass
+    form = SettingForm()
+    error = ""
+    if form.validate_on_submit():
+        name = form.name.data
+        email = form.email.data
+        msg = Message("Hello",
+                sender="dizhu210@gmail.com",
+                recipients=[email])
+        mail.send(msg)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
+        new_user = User(email=email, name=name, password_hash=hashed_password)
+        db.session.add(new_user)
+        db.session.flush()
+        role = db.session.query(Role)[1]
+        new_user.roles.append(role)
+        role.users.append(new_user)
+        db.session.commit()
+        flash('You were successfully registered')
+        return redirect(url_for('auth_bp.login'))
+    return render_template("signup.html", form=form, error=error)
+
 
 
 @auth_bp.route("/lost_and_find")

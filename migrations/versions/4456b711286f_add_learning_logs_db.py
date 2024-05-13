@@ -1,8 +1,8 @@
-"""delete user_id from roles
+"""add learning_logs_db
 
-Revision ID: b7dae906de3b
-Revises: d15517e399f9
-Create Date: 2024-04-16 11:49:49.029159
+Revision ID: 4456b711286f
+Revises: 
+Create Date: 2024-05-13 12:44:11.960582
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b7dae906de3b'
-down_revision = 'd15517e399f9'
+revision = '4456b711286f'
+down_revision = None
 branch_labels = None
 depends_on = None
 

@@ -1,12 +1,13 @@
 import os
 from flask import Flask, render_template
-from .learning_logs import learning_logs_bp
+from .learning_logs.views import learning_logs_bp
 from .auth import auth_bp
 from .main import main_bp
 from config import config
 from flask_admin import Admin
-from .extensions import db, migrate, login_manager, csrf
+from .extensions import db, migrate, login_manager, csrf, ckeditor
 from app.auth.models import User, Role
+from app.learning_logs.models import Comment, Category, Post 
 from dotenv import load_dotenv
 from .auth.views import UserAdmin, RoleAdmin, MyView, MyHomeView
 from flask import render_template
@@ -37,6 +38,7 @@ def register_extensions(app):
     csrf.init_app(app)
     mail.init_app(app)
     bcrypt.init_app
+    ckeditor.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     app.register_blueprint(main_bp, url_prefix='/')

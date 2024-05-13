@@ -7,6 +7,7 @@ from flask_bootstrap import Bootstrap5
 from flask_bcrypt import Bcrypt 
 from flask_mail import Mail
 from faker import Faker
+from flask_ckeditor import CKEditor
 
 class Base(DeclarativeBase):
   pass
@@ -22,4 +23,5 @@ login_manager.login_view = "login"
 bcrypt = Bcrypt() 
 mail = Mail()
 fake = Faker()
+ckeditor = CKEditor()
 # login_manager.login_message_category = "info"

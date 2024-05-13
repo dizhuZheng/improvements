@@ -36,9 +36,7 @@ class UserAdmin(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.get_id()=='11'
     
-    
-                 
-    
+       
 class RoleAdmin(ModelView):
     column_list = ('name', 'users')
     def is_accessible(self):
