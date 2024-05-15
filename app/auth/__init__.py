@@ -1,24 +1,33 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, Response
 from .forms import LoginForm, RegisterForm, SettingForm
 from app.auth.models import User, Role
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required, current_user, fresh_login_required
 from ..extensions import login_manager, db, bcrypt, mail
 from flask_mail import Message
+from flask_principal import identity_changed, Identity, current_app
+from .permission import admin_authority
+
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
 
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return 'Unauthorized', 401
 
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+@login_manager.request_loader
+def request_loader(request):
+    email = request.form.get('email')
+    users = db.session.query(User).all()
+    if email not in users:
+        return
+    
+@auth_bp.route('/admin')
+@admin_authority.require()
+def do_admin_index():
+    return Response('Only if you are an admin')
 
 
 @auth_bp.route('/test', methods=['GET', 'POST'])
 def index():
+    with admin_authority.require():
+        return Response('Only if you are admin')
     if request.method == 'POST':  
             name = request.form.get('name')  
             occupation = request.form.get('occupation')
@@ -37,9 +46,8 @@ def login():
         user = User.query.filter_by(name=name).first()
         if user:
             if bcrypt.check_password_hash(user.password_hash, password):
-                db.session.add(user)
-                db.session.commit()
                 login_user(user, remember=True)
+                identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
                 return redirect(url_for("auth_bp.protected"))
             else:
               error = "Ah-oh, your password is wrong."
@@ -76,7 +84,7 @@ def signup():
             new_user = User(email=email, name=name, password_hash=hashed_password)
             db.session.add(new_user)
             db.session.flush()
-            role = db.session.query(Role)[1]
+            role = Role.query.filter_by(name='Normal').first()
             new_user.roles.append(role)
             role.users.append(new_user)
             db.session.commit()
@@ -92,38 +100,33 @@ def logout():
     return 'Logged out'
 
 
-
+# @route('/admin/dashboard')    # @route() must always be the outer-most decorator
+# @roles_required('Admin')
+# def admin_dashboard():
+    # render the admin dashboard
 @auth_bp.route('/error')
 def errors():
     pass
 
 
-@auth_bp.route("/settings")
-@login_required
+@auth_bp.route("/settings", methods=['GET', 'POST'])
+@fresh_login_required
 def settings():
-    form = SettingForm()
+    form = SettingForm(request.form, obj=current_user)
     error = ""
     if form.validate_on_submit():
-        name = form.name.data
-        email = form.email.data
-        msg = Message("Hello",
-                sender="dizhu210@gmail.com",
-                recipients=[email])
-        mail.send(msg)
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
-        new_user = User(email=email, name=name, password_hash=hashed_password)
-        db.session.add(new_user)
-        db.session.flush()
-        role = db.session.query(Role)[1]
-        new_user.roles.append(role)
-        role.users.append(new_user)
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+        current_user.password = form.password.data
+        current_user.verified = True
         db.session.commit()
-        flash('You were successfully registered')
+        db.session.commit()
+        flash('All your info has been updated !')
         return redirect(url_for('auth_bp.login'))
-    return render_template("signup.html", form=form, error=error)
+    return render_template('settings.html', form=form, error=error, current_user=current_user)
 
-
-
+        
 @auth_bp.route("/lost_and_find")
+@fresh_login_required
 def account_recovery():
     pass

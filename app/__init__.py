@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, g, session
 from .learning_logs.views import learning_logs_bp
 from .auth import auth_bp
 from .main import main_bp
@@ -11,15 +11,17 @@ from app.learning_logs.models import Comment, Category, Post
 from dotenv import load_dotenv
 from .auth.views import UserAdmin, RoleAdmin, MyView, MyHomeView
 from flask import render_template
-from app.extensions import login_manager, db, bootstrap, bcrypt, mail
+from app.extensions import login_manager, db, bootstrap, bcrypt, mail, principals
 
 load_dotenv()
 
 def page_not_found(e):
   return render_template('404.html'), 404
 
+
 def internal_server_error(e):
   return render_template('500.html'), 500
+
 
 def create_app(config_name=None):
     if config_name is None:
@@ -38,6 +40,7 @@ def register_extensions(app):
     csrf.init_app(app)
     mail.init_app(app)
     bcrypt.init_app
+    principals.init_app(app)
     ckeditor.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)

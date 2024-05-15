@@ -8,10 +8,10 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from faker import Faker
 from flask_ckeditor import CKEditor
+from flask_principal import Principal
 
 class Base(DeclarativeBase):
   pass
-
 
 db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
@@ -19,9 +19,14 @@ login_manager = LoginManager()
 bootstrap = Bootstrap5()
 login_manager.session_protection = "strong"
 csrf = CSRFProtect()
-login_manager.login_view = "login"
+login_manager.login_view = "auth_bp.login"
 bcrypt = Bcrypt() 
 mail = Mail()
 fake = Faker()
 ckeditor = CKEditor()
-# login_manager.login_message_category = "info"
+principals = Principal()
+login_manager.refresh_view = "accounts.reauthenticate"
+login_manager.needs_refresh_message = (
+    u"To protect your account, please reauthenticate to access this page."
+)
+login_manager.needs_refresh_message_category = "info"

@@ -8,6 +8,11 @@ class Config:
     if not SECRET_KEY:
       raise ValueError("No SECRET_KEY set for Flask application")
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SESSION_COOKIE_SAMESITE = "strict"
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "strict"
+    REMEMBER_COOKIE_SECURE = True
     
     @property
     def DATABASE_URI(self):  # Note: all caps

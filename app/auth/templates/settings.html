@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+{% if error %}
+  <p class=error><strong>Error:</strong> {{ error }}
+{% endif %}
+{% if current_user.is_authenticated %}
+  <div class="column is-4 is-offset-4">
+      <h3 class="title">Settings</h3>
+      <div class="box">
+          <form method="POST" action="">
+              {{ form.csrf_token }}
+              {{ render_form(form) }}
+              <button type="button" onclick="alert('Welcome to GeeksforGeeks')">Update name</button>
+              <button type="button" onclick="alert('Welcome to GeeksforGeeks')">Update email</button>
+              <button type="button" onclick="alert('Welcome to GeeksforGeeks')">Update password</button>
+              <button type="button" onclick="alert('Welcome to GeeksforGeeks')">Click Here</button>
+          </form>
+      </div>
+  </div>
+{% endif %}
+{% endblock %}
