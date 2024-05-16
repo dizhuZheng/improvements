@@ -1,5 +1,5 @@
 from ..extensions import db, bcrypt, login_manager
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 
 
 user_role_association = db.Table(
@@ -24,37 +24,38 @@ class User(UserMixin, db.Model):
     # @email.setter
     # def email(self, value):
     #     self.email = value  # on user.email='xyz': set user.email_address='xyz'
-
-    # @property
-    # def password(self):
-    #     return self.password_hash
     
-    # @password.setter
-    # def password(self, password):  
-    #     self.password_hash = password
-
-    # @property
-    # def name(self):  
-    #     return self.name
-     
-    # @name.setter
-    # def name(self, name):  
-    #     self.name = name
-      
     def validate_password(self, password):  
-        return bcrypt.check_password_hash(self.password_hash, password)  
+        return bcrypt.check_password_hash(self.password_hash, password) 
     
-    def __repr__(self):
-        return self.name
+    def __str__(self):
+        return f'{self.name} and the roles are {self.roles}'
+    
+    def __repr__(self): 
+        return f'Role(\'{self.name}\', {self.roles})'
 
+      
+    
 @login_manager.user_loader
 def load_user(id):
     user = User.query.get(int(id))
     return user
 
+
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return 'Unauthorized', 401
+
+
+class AnonymousUser(AnonymousUserMixin):
+
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser
 
 
 class Role(db.Model):
@@ -63,5 +64,12 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True)
     users = db.relationship("User", secondary=user_role_association, back_populates="roles")
 
-    def __repr__(self):
-        return self.name
+    def __init__(self, id, name): 
+        self.id = id 
+        self.name = name 
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def __repr__(self): 
+        return f'Role(\'{self.name}\')'

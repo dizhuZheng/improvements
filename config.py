@@ -1,6 +1,7 @@
 import os 
 from dotenv import load_dotenv
 load_dotenv()
+from datetime import timedelta 
 
 class Config:
     FLASK_ADMIN_SWATCH = 'journal'
@@ -11,6 +12,7 @@ class Config:
     SESSION_COOKIE_SAMESITE = "strict"
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=0.5)
     REMEMBER_COOKIE_SAMESITE = "strict"
     REMEMBER_COOKIE_SECURE = True
     

@@ -8,7 +8,7 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from faker import Faker
 from flask_ckeditor import CKEditor
-from flask_principal import Principal
+from flask_principal import Principal, Permission, RoleNeed
 
 class Base(DeclarativeBase):
   pass
@@ -25,6 +25,9 @@ mail = Mail()
 fake = Faker()
 ckeditor = CKEditor()
 principals = Principal()
+admin_permission = Permission(RoleNeed('Admin'))
+poster_permission = Permission(RoleNeed('Editor'))
+default_permission = Permission(RoleNeed('Normal'))
 login_manager.refresh_view = "accounts.reauthenticate"
 login_manager.needs_refresh_message = (
     u"To protect your account, please reauthenticate to access this page."

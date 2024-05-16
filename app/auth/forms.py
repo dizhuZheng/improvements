@@ -7,7 +7,7 @@ from flask_login import current_user
 
 
 class LoginForm(FlaskForm):
-    name = fields.StringField(label='name', validators=[DataRequired()])
+    name = fields.StringField(label='name or email', validators=[DataRequired()])
     password = fields.PasswordField(label='password', validators=[DataRequired()])
     remember = fields.BooleanField(label='Remember me', default="checked")
     submit = fields.SubmitField('Submit')
