@@ -34,8 +34,7 @@ class User(UserMixin, db.Model):
     def __repr__(self): 
         return f'Role(\'{self.name}\', {self.roles})'
 
-      
-    
+       
 @login_manager.user_loader
 def load_user(id):
     user = User.query.get(int(id))

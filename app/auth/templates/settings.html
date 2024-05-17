@@ -16,7 +16,82 @@
               <button type="button" onclick="alert('Welcome to GeeksforGeeks')">Update password</button>
               <button type="button" onclick="alert('Welcome to GeeksforGeeks')">Click Here</button>
           </form>
+          <form method="POST">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.email.label() }}
+                {{ form.email(class='form-control') }}
+                {% if form.email.errors: %}
+                <div class="invalid-feedback">
+                    {{ form.email.errors[0] }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.firstname.label() }}
+                {{ form.firstname(class='form-control') }}
+                {% if form.firstname.errors: %}
+                <div class="invalid-feedback">
+                    {{ form.firstname.errors[0] }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.lastname.label() }}
+                {{ form.lastname(class='form-control') }}
+                {% if form.lastname.errors: %}
+                <div class="invalid-feedback">
+                    {{ form.lastname.errors[0] }}
+                </div>
+                {% endif %}
+            </div>
+            {{ form.submit(class='btn btn-primary') }}
+        </form>
       </div>
   </div>
+  {% extends 'navbar.html' %}
+
+{% block content %}
+
+<div class="container-sm">
+    <div class="home-header">
+        {% with messages=get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{category}}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="card text-left">
+                <div class="card-body">
+                    <table class="table table-striped table-dark shadow-lg">
+                        {% for key in user_details.keys() %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ user_details[key][1] }}</td>
+                            {% if key not in ['User ID', 'Date Registered', 'Account Type'] %}
+                            <td>
+                                <div class="form-group">
+                                    <input class="form-control" id="update_field" name="update_{{user_details[key][0]}}"
+                                           placeholder="Type to update {{ key }}">
+                                </div>
+                            </td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Make Changes</button>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}
 {% endif %}
 {% endblock %}
