@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, \
 request, Response, session, current_app, abort, g
-from is_safe_url import is_safe_url
 from .forms import LoginForm, RegisterForm, SettingForm
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user, \
@@ -8,8 +7,8 @@ from flask_login import login_user, logout_user, login_required, current_user, \
 from ..extensions import login_manager, db, bcrypt, mail
 from flask_mail import Message
 from flask_principal import Permission, Identity, AnonymousIdentity, \
-     identity_changed, identity_loaded, UserNeed, RoleNeed
-from urllib.parse import urlparse
+     identity_changed, identity_loaded, UserNeed, RoleNeed, ActionNeed
+from urllib.parse import urlparse, urljoin
 
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
@@ -17,11 +16,14 @@ auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_fo
 
 # Needs
 be_admin = RoleNeed('Admin')
+to_sign_in = ActionNeed('Log In')
 # Permissions
+user = Permission(to_sign_in)
+user.description = "User's permissions"
 admin = Permission(be_admin)
 admin.description = "Admin's permissions"
-apps_needs = [be_admin]
-apps_permissions = [admin]
+apps_needs = [be_admin, to_sign_in]
+apps_permissions = [admin, user]
 
 # @login_manager.request_loader
 # def request_loader(request):
@@ -29,20 +31,10 @@ apps_permissions = [admin]
 #     users = db.session.query(User).all()
 #     if email not in users:
 #         return
-    
-# @auth_bp.route('/admin')
-# @admin_authority.require()
-# def do_admin_index():
-#     return Response('Only if you are an admin')
 
-#The function adds all the permissions that are needed corresponding 
-#to the user role that we fetched from our User class once the identity is loaded.
 @identity_loaded.connect
 def on_identity_loaded(sender, identity):
-    needs = []
     identity.user = current_user
-    if identity.id == 'admin':
-        needs.append(be_admin) 
     # Add the UserNeed to the identity
     if hasattr(current_user, 'id'):
         identity.provides.add(UserNeed(current_user.id))
@@ -51,20 +43,17 @@ def on_identity_loaded(sender, identity):
             identity.provides.add(RoleNeed(role.name)) 
 
 
-@auth_bp.route('/test', methods=['GET', 'POST'])
-def index():
-    with admin_authority.require():
-        return Response('Only if you are admin')
-    if request.method == 'POST':  
-            name = request.form.get('name')  
-            occupation = request.form.get('occupation')
-            flash('Item created.')  
-            return redirect(url_for('main_bp.main'))  
-    return render_template("test.html")
+def redirect_url(default='main_bp.main'):
+    return request.args.get('next') or \
+           request.referrer or \
+           url_for(default)
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash("You've already logged in ! " + current_user.name)
+        return redirect(redirect_url())
     form = LoginForm()
     error = ""
     if form.validate_on_submit():
@@ -77,16 +66,11 @@ def login():
                     login_user(user, remember=True)
                 else:
                     login_user(user)
-                # session.clear()
                 session['logged_in']=True
                 session["name"] = request.form.get("name")
                 identity_changed.send(current_app._get_current_object(),
                                   identity=Identity(user.id))
-                next = request.args.get('next')
-                # o = urlparse(request.base_url)
-                # if not is_safe_url(next, allowed_hosts=o.hostname):
-                #     return abort(400)
-                return redirect(url_for("auth_bp.protected") or next)
+                return redirect(url_for("auth_bp.protected"))
             else:
               error = "Ah-oh, your password is wrong."
         else:
@@ -112,6 +96,9 @@ def protected():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if current_user.is_authenticated:
+        flash("You've already logged in ! " + current_user.name)
+        return redirect(redirect_url())
     form = RegisterForm()
     error = ""
     if form.validate_on_submit():
@@ -120,7 +107,7 @@ def signup():
         email = form.email.data
         info = User.query.filter_by(email=email).first()
         if user or info :
-            error = "sorry, user existed already."
+            error = "sorry, user existed already. Want to log in instead ?"
         else:
             password = form.password.data
             # msg = Message("Hello",
@@ -144,6 +131,7 @@ def signup():
 @login_required
 def logout():
     logout_user()
+    flash("You've logged out !")
     for key in ('identity.name', 'identity.auth_type'):
         session.pop(key, None)
     # Tell Flask-Principal the user is anonymous
@@ -176,7 +164,7 @@ def settings():
         current_user.password = form.password.data
         current_user.verified = True
         db.session.commit()
-        flash('All your info has been updated !')
+        flash('All your info has been updated ! You have to log in again')
         return redirect(url_for('auth_bp.login'))
     return render_template('settings.html', form=form, error=error, current_user=current_user)
 

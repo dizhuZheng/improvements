@@ -4,6 +4,7 @@
 <div class="column is-4 is-offset-4">
     {% if error %}
         <p class=error><strong>Error:</strong> {{ error }}
+        <a href="{{ url_for('auth_bp.login') }}" >Log In </a>
     {% endif %}
     <h3 class="title">Sign Up</h3>
     <p>{{ message }}</p>

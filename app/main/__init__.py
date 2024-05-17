@@ -6,5 +6,5 @@ main_bp = Blueprint('main_bp', __name__,template_folder='./templates', static_fo
 
 @main_bp.route('/', methods=['GET'])
 def main():
-  return render_template('index.html', items=['About', 'Login', 'Signup'])
+  return render_template('index.html')
 
