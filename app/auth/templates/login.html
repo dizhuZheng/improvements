@@ -11,6 +11,12 @@
             {{ form.csrf_token }}
             {{ render_form(form) }}
         </form>
+        <p>FORGET PASSWORD
+            <a href="{{ url_for('auth_bp.reset_password') }}">Click Here To Reset Password</a>
+        </p>
+        <p>JOIN US!..
+            <a href="{{ url_for('auth_bp.signup') }}">Register Account</a>
+        </p>
     </div>
 </div>
 {% endblock %}

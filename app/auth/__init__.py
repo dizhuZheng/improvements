@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, \
-request, Response, session, current_app, abort, g
-from .forms import LoginForm, RegisterForm, SettingForm
+request, session, current_app, abort
+from .forms import LoginForm, RegisterForm, FormResetPasswordMail
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user, \
     fresh_login_required
@@ -8,11 +8,9 @@ from ..extensions import login_manager, db, bcrypt, mail
 from flask_mail import Message
 from flask_principal import Permission, Identity, AnonymousIdentity, \
      identity_changed, identity_loaded, UserNeed, RoleNeed, ActionNeed
-from urllib.parse import urlparse, urljoin
-
+from app.emails import send_mail
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
-
 
 # Needs
 be_admin = RoleNeed('Admin')
@@ -25,12 +23,17 @@ admin.description = "Admin's permissions"
 apps_needs = [be_admin, to_sign_in]
 apps_permissions = [admin, user]
 
-# @login_manager.request_loader
-# def request_loader(request):
-#     email = request.form.get('email')
-#     users = db.session.query(User).all()
-#     if email not in users:
-#         return
+
+# @auth_bp.before_request
+# def before_request():
+#     if (current_user.is_authenticated and
+#             not current_user.confirm and
+#             request.endpoint not in ['re_userconfirm', 'logout', 'user_confirm'] and
+#             request.endpoint != 'static'):
+#         flash('Hi, please activate your account first. Your endpoint:%s' % request.endpoint)
+#         return render_template('unactivate.html')
+#     session.modified = True
+
 
 @identity_loaded.connect
 def on_identity_loaded(sender, identity):
@@ -70,28 +73,13 @@ def login():
                 session["name"] = request.form.get("name")
                 identity_changed.send(current_app._get_current_object(),
                                   identity=Identity(user.id))
-                return redirect(url_for("auth_bp.protected"))
+                current_user.confirm = True
+                return redirect(url_for("admin.index"))
             else:
               error = "Ah-oh, your password is wrong."
         else:
             error = 'No exsting user.'
     return render_template("login.html", form=form, error=error)
-
-
-@auth_bp.route('/admin')
-@admin.require(http_exception=403)
-def admin():
-    return render_template('test.html')
-
-
-@auth_bp.route('/protected')
-@login_required
-def protected():
-    if not session.get("name"):
-        flash ("Your session has expired!")
-        return redirect(url_for('auth_bp.login'))
-    message = "success!"
-    return render_template('profile.html', current_user=current_user, message=message)
 
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
@@ -110,10 +98,7 @@ def signup():
             error = "sorry, user existed already. Want to log in instead ?"
         else:
             password = form.password.data
-            # msg = Message("Hello",
-            #     sender="dizhu210@gmail.com",
-            #     recipients=[email])
-            # mail.send(msg)
+            send_mail()
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
             new_user = User(email=email, name=name, password_hash=hashed_password)
             db.session.add(new_user)
@@ -137,40 +122,37 @@ def logout():
     # Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(),
                           identity=AnonymousIdentity())
-    session.pop('name')
     next = request.args.get('next')
     # if not is_safe_url(next):
     #     return abort(400)
     return redirect(next or '/')
-
-
-# @route('/admin/dashboard')    # @route() must always be the outer-most decorator
-# @roles_required('Admin')
-# def admin_dashboard():
-    # render the admin dashboard
-@auth_bp.route('/error')
-def errors():
-    pass
-
-
-@auth_bp.route("/settings", methods=['GET', 'POST'])
-@fresh_login_required
-def settings():
-    form = SettingForm(request.form, obj=current_user)
-    error = ""
-    if form.validate_on_submit():
-        current_user.name = form.name.data
-        current_user.email = form.email.data
-        current_user.password = form.password.data
-        current_user.verified = True
-        db.session.commit()
-        flash('All your info has been updated ! You have to log in again')
-        return redirect(url_for('auth_bp.login'))
-    return render_template('settings.html', form=form, error=error, current_user=current_user)
 
         
 @auth_bp.route("/lost_and_find")
 @fresh_login_required
 def account_recovery():
     pass
+
+
+@auth_bp.route('/re_userconfirm')
+@login_required
+def re_userconfirm():
+    token = current_user.create_confirm_token()
+    send_mail(sender='Your Mail@hotmail.com',
+              recipients=['Your Mail@gmail.com'],
+              subject='Activate your account',
+              template='author/mail/welcome',
+              mailtype='html',
+              user=current_user,
+              token=token)
+    flash('Please Check Your Email..')
+    return redirect(url_for('index'))
+
+
+@auth_bp.route('/resetpassword', methods=['GET', 'POST'])
+def reset_password():
+    form = FormResetPasswordMail()
+    if form.validate_on_submit():
+        return 'RESET'
+    return render_template('resetpassword.html', form=form)
 

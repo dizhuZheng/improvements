@@ -1,5 +1,7 @@
 from ..extensions import db, bcrypt, login_manager
 from flask_login import UserMixin, AnonymousUserMixin
+from itsdangerous.serializer import Serializer
+import os
 
 
 user_role_association = db.Table(
@@ -16,15 +18,13 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(100), nullable=False)
     roles = db.relationship('Role', secondary=user_role_association, back_populates="users")
     about = db.Column(db.Text(), nullable=True)
-
-    # @property
-    # def email(self):
-    #     return self.email   
-
-    # @email.setter
-    # def email(self, value):
-    #     self.email = value  # on user.email='xyz': set user.email_address='xyz'
     
+    def __init__(self, name, email, password_hash, about):
+        self.name = name
+        self.email = email
+        self.password_hash = password_hash
+        self.about = about
+
     def validate_password(self, password):  
         return bcrypt.check_password_hash(self.password_hash, password) 
     
@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
     
     def __repr__(self): 
         return f'Role(\'{self.name}\', {self.roles})'
-
+    
        
 @login_manager.user_loader
 def load_user(id):
@@ -63,8 +63,7 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True)
     users = db.relationship("User", secondary=user_role_association, back_populates="roles")
 
-    def __init__(self, id, name): 
-        self.id = id 
+    def __init__(self, name): 
         self.name = name 
 
     def __str__(self):

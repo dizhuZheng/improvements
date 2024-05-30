@@ -1,44 +1,21 @@
 from flask_admin.contrib.sqla import ModelView
-from flask_admin import BaseView, expose, AdminIndexView
-from flask import render_template, redirect, url_for, flash, abort
+from flask_admin import expose, AdminIndexView, BaseView
+from flask import redirect, url_for, request, flash
 from flask_login import current_user
+from . import admin
 
-
-class MyView(BaseView):
+class MyView(AdminIndexView):
     @expose('/')
-    def index(self):
-        return 'Hello World!'
-    def is_accessible(self):
-        return current_user.is_authenticated
-
-
-class MyHomeView(AdminIndexView):
-    @expose('/home')
+    @admin.require(http_exception=403)
     def index(self):
         arg1 = 'Hello'
         return self.render('admin/myhome.html', arg1=arg1)
-    def get_url(self, endpoint, **kwargs):
-        """
-            If you want to customize URL generation
-            logic (persist some query string argument, for example), this is
-            right place to do it.
-            :param endpoint:
-                Flask endpoint name
-            :param kwargs:
-                Arguments for `url_for`
-        """
-        return url_for(endpoint, **kwargs)
+    @expose('/test/')
+    def test(self):
+        return self.render('admin/test.html')
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for("main.index"))
 
+
+        
     
-class UserAdmin(ModelView):
-    column_list = ('name', 'email', 'roles', 'active')
-    column_labels = {'name': 'Username', 'email': 'Email Address', 'roles': 'Role', 'active':'Active'}
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.get_id()=='11'
-    
-       
-class RoleAdmin(ModelView):
-    column_list = ('name', 'users')
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.get_id()=='11'
-                 

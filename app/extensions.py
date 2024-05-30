@@ -28,7 +28,8 @@ principals = Principal()
 admin_permission = Permission(RoleNeed('Admin'))
 poster_permission = Permission(RoleNeed('Editor'))
 default_permission = Permission(RoleNeed('Normal'))
-login_manager.refresh_view = "accounts.reauthenticate"
+login_manager.refresh_view = "auth_bp.login"
+login_manager.login_message = u'Please log in to access this page.'
 login_manager.needs_refresh_message = (
     u"To protect your account, please reauthenticate to access this page."
 )

@@ -8,13 +8,16 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY")
     if not SECRET_KEY:
       raise ValueError("No SECRET_KEY set for Flask application")
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') 
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SESSION_COOKIE_SAMESITE = "strict"
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=0.5)
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=20)
     REMEMBER_COOKIE_SAMESITE = "strict"
     REMEMBER_COOKIE_SECURE = True
+    ADMIN_USERS = ["admin"]
     
     @property
     def DATABASE_URI(self):  # Note: all caps
