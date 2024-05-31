@@ -23,6 +23,9 @@ def internal_server_error(e):
   return render_template('500.html'), 500
 
 
+def unauthorized(e):
+    return render_template('401.html'), 401
+
 def create_app(config_name=None):
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')

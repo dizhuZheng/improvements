@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, \
-request, session, current_app, abort
-from .forms import LoginForm, RegisterForm, FormResetPasswordMail
+request, session, current_app, abort, jsonify
+from .forms import LoginForm, RegisterForm, FormResetPasswordMail, ChangeNameForm, \
+ChangeEmailForm, ChangeAboutForm
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user, \
     fresh_login_required
@@ -74,7 +75,7 @@ def login():
                 identity_changed.send(current_app._get_current_object(),
                                   identity=Identity(user.id))
                 current_user.confirm = True
-                return redirect(url_for("admin.index"))
+                return redirect(url_for("auth_bp.profile"))
             else:
               error = "Ah-oh, your password is wrong."
         else:
@@ -110,6 +111,54 @@ def signup():
             flash('You were successfully registered')
             return redirect(url_for('auth_bp.login'))
     return render_template("signup.html", form=form, error=error)
+
+
+@auth_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    return render_template("profile.html")
+
+
+@auth_bp.route("/change_name", methods=['GET', 'POST'])
+@fresh_login_required
+def changename():
+    form = ChangeNameForm(obj=current_user) 
+    if form.validate_on_submit():  
+        form.populate_obj(current_user)
+        db.session.commit()
+        flash('Your new info is saved!')
+        return redirect(url_for('auth_bp.profile'))
+    elif request.method == 'GET':
+        form.name.data = current_user.name
+    return render_template('changename.html', form = form)
+
+
+@auth_bp.route("/change_email", methods=['GET', 'POST'])
+@fresh_login_required
+def change_email():
+    form = ChangeEmailForm(obj=current_user) 
+    if form.validate_on_submit():  
+        form.populate_obj(current_user)
+        db.session.commit()
+        flash('Your new info is saved!')
+        return redirect(url_for('auth_bp.profile'))
+    elif request.method == 'GET':
+        form.email.data = current_user.email
+    return render_template('changeemail.html', form = form)
+
+
+@auth_bp.route("/change_about", methods=['GET', 'POST'])
+@fresh_login_required
+def change_about():
+    form = ChangeAboutForm(obj=current_user) 
+    if form.validate_on_submit():  
+        form.populate_obj(current_user) 
+        db.session.commit()
+        flash('Your new info is saved!')
+        return redirect(url_for('auth_bp.profile'))
+    elif request.method == 'GET':
+        form.about.data = current_user.about
+    return render_template('about.html', form = form)
 
 
 @auth_bp.route('/logout')
@@ -156,3 +205,7 @@ def reset_password():
         return 'RESET'
     return render_template('resetpassword.html', form=form)
 
+
+@login_manager.unauthorized_handler
+def unauth_handler():
+    return render_template('401.html'), 401

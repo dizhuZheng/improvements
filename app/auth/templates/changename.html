@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+<p>my current name is: {{ current_user.name }}</p>
+<div class="column is-4 is-offset-4">
+    <div class="box">
+      <form method="POST" action="">          
+          {{ form.csrf_token }}
+          {{ render_form(form) }}           
+      </form>
+    </div>
+  </div>
+{% endblock %}

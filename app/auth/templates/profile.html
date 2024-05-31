@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+<h1>My profile</h1>
+<div class="column is-4 is-offset-4">
+    <div class="box">
+      <p>Heeeeello, {{ current_user.name }}</p>
+      <h3>Status:</h3>
+      {% for role in current_user.roles %}
+        <p>{{ role }}</p>
+      {% endfor %}
+      <div>my email:
+        <address> 
+          <p>{{ current_user.email }}</p>
+        </address>
+      </div>
+      {{ current_user.about }}
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="{{ url_for('auth_bp.changename') }}">change name</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('auth_bp.change_email') }}">change email</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('auth_bp.change_email') }}">change password</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('auth_bp.change_about') }}">change about</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

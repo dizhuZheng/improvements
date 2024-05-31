@@ -1,0 +1,9 @@
+<body>
+  <form method="post" action="">
+    {{ form.csrf_token }}
+    {{ form.about() }}
+    {{ form.submit() }}
+  </form>
+  {{ ckeditor.load() }}
+  {{ ckeditor.config(name='body') }}
+</body>
