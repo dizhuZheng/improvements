@@ -1,5 +1,6 @@
 from app import create_app
 
 if __name__ == '__main__':
-    app = create_app() # 接受一个参数，是应用使用的配置名。
-    app.run(use_reloader=True, port=5000)
+    app = create_app() 
+    app.run(host='0.0.0.0', port=5001, debug=False, threaded = False, processes=5)
+    # 即多个客户端同时调用访问restful接口，这个服务程序是以多线程方式处理的

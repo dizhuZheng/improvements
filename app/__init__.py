@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, g, session
+from flask import Flask, render_template, jsonify, request
 from .learning_logs.views import learning_logs_bp
 from .auth import auth_bp
 from .auth.models import User, Role
@@ -12,6 +12,11 @@ from .auth.views import MyView
 from flask import render_template
 from app.extensions import login_manager, db, bootstrap, bcrypt, mail, principals
 from flask_admin.contrib.sqla import ModelView
+import logging
+import signal
+from .background_thread import BackgroundThreadFactory, TASKS_QUEUE
+
+logging.basicConfig(level=logging.INFO, force=True)
 
 load_dotenv()
 
@@ -34,6 +39,35 @@ def create_app(config_name=None):
     register_extensions(app)
     with app.app_context():
         db.create_all()
+    # @app.route('/task', methods=['POST'])
+    # def submit_task():
+    #     task = request.json
+    #     logging.info(f'Received task: {task}')
+
+    #     TASKS_QUEUE.put(task)
+    #     return jsonify({'success': 'OK'})
+
+    # notification_thread = BackgroundThreadFactory.create('notification')
+
+    # this condition is needed to prevent creating duplicated thread in Flask debug mode
+    # if not (app.debug or os.environ.get('FLASK_ENV') == 'development') or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    #     notification_thread.start()
+
+    #     original_handler = signal.getsignal(signal.SIGINT)
+
+    #     def sigint_handler(signum, frame):
+    #         notification_thread.stop()
+
+            # wait until thread is finished
+            # if notification_thread.is_alive():
+            #     notification_thread.join()
+
+            # original_handler(signum, frame)
+
+        # try:
+        #     signal.signal(signal.SIGINT, sigint_handler)
+        # except ValueError as e:
+        #     logging.error(f'{e}. Continuing execution...')
     return app
 
 

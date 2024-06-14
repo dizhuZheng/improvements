@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, \
 request, session, current_app, abort, jsonify
 from .forms import LoginForm, RegisterForm, FormResetPasswordMail, ChangeNameForm, \
-ChangeEmailForm, ChangeAboutForm
+ChangeEmailForm, ChangeAboutForm, FormResetPassword
 from app.auth.models import User, Role
 from flask_login import login_user, logout_user, login_required, current_user, \
     fresh_login_required
@@ -9,7 +9,7 @@ from ..extensions import login_manager, db, bcrypt, mail
 from flask_mail import Message
 from flask_principal import Permission, Identity, AnonymousIdentity, \
      identity_changed, identity_loaded, UserNeed, RoleNeed, ActionNeed
-from app.emails import send_mail
+import os 
 
 auth_bp = Blueprint('auth_bp', __name__,template_folder='./templates', static_folder='./static', static_url_path='./assets')
 
@@ -99,7 +99,9 @@ def signup():
             error = "sorry, user existed already. Want to log in instead ?"
         else:
             password = form.password.data
-            send_mail()
+            msg = Message(subject='Hello from the other side!', sender='peter@mailtrap.io', recipients=['paul@mailtrap.io'])
+            msg.body = "Hey Paul, sending you this email from my Flask app, lmk if it works"
+            mail.send(msg)
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
             new_user = User(email=email, name=name, password_hash=hashed_password)
             db.session.add(new_user)
@@ -157,7 +159,7 @@ def change_about():
         flash('Your new info is saved!')
         return redirect(url_for('auth_bp.profile'))
     elif request.method == 'GET':
-        form.about.data = current_user.about
+       form.about.data = current_user.about
     return render_template('about.html', form = form)
 
 
@@ -186,26 +188,55 @@ def account_recovery():
 @auth_bp.route('/re_userconfirm')
 @login_required
 def re_userconfirm():
-    token = current_user.create_confirm_token()
-    send_mail(sender='Your Mail@hotmail.com',
-              recipients=['Your Mail@gmail.com'],
-              subject='Activate your account',
-              template='author/mail/welcome',
-              mailtype='html',
-              user=current_user,
-              token=token)
-    flash('Please Check Your Email..')
-    return redirect(url_for('index'))
+    return
 
 
 @auth_bp.route('/resetpassword', methods=['GET', 'POST'])
 def reset_password():
+    if not current_user.is_anonymous:
+        return redirect(url_for('auth_bp.profile'))
     form = FormResetPasswordMail()
     if form.validate_on_submit():
-        return 'RESET'
+        email=form.email.data
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = user.generate_confirmation_token()
+            msg = Message(subject='Hello from the other side!', sender='dizhu210@gmail.com', recipients=[email], attachments=token)
+            msg.body = "Hey Paul, sending you this email from my Flask app, lmk if it works."
+            mail.send(msg)
+            flash('Please Check Your Email. Then Click link to Reset Password')
+            return render_template(url_for('auth_bp.login'))
     return render_template('resetpassword.html', form=form)
 
 
 @login_manager.unauthorized_handler
 def unauth_handler():
     return render_template('401.html'), 401
+
+
+@auth_bp.route('/resetpassword/<token>', methods=['GET', 'POST'])
+def reset_password_recive(token):
+    if not current_user.is_anonymous:
+        return redirect(url_for('auth_bp.profile'))
+    form = FormResetPassword()
+    if form.validate_on_submit():
+        user = User()
+        data = user.confirm_token(token)
+        if data:
+            #  如果未來有需求的話，還要確認使用者是否被停權了。
+            #  如果是被停權的使用者，應該要先申請復權。
+            #  下面注意，複製過來的話記得改一下id的取得是reset_id，不是user_id
+            user = User.query.filter_by(id=data.get('reset_id')).first()
+            #  再驗證一次是否確實的取得使用者資料
+            if user:
+                user.password = form.password.data
+                db.session.commit()
+                flash('Sucess Reset Your Password, Please Login')
+                return redirect(url_for('login'))
+            else:
+                flash('No such user, i am so sorry')
+                return redirect(url_for('login'))
+        else:
+            flash('Worng token, maybe it is over 24 hour, please apply again')
+            return redirect(url_for('login'))
+    return render_template('author/resetpassword.html', form=form)

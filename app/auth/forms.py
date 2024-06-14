@@ -27,6 +27,23 @@ class FormResetPasswordMail(FlaskForm):
     ])
     submit = fields.SubmitField('Send Confirm EMAIL')
 
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValidationError('No Such EMAIL, Please Check!')
+
+
+class FormResetPassword(FlaskForm):
+    """lost password """
+    password = fields.PasswordField('PassWord', validators=[
+        DataRequired(),
+        Length(5, 10),
+        EqualTo('password_confirm', message='PASSWORD NEED MATCH')
+    ])
+    password_confirm = fields.PasswordField('Confirm PassWord', validators=[
+        DataRequired()
+    ])
+    submit = fields.SubmitField('Reset Password')
+
 
 class ChangeNameForm(FlaskForm):
     name = fields.StringField(validators=[DataRequired(message = 'Enter a valid name'), Length(1, 20)])

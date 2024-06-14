@@ -10,15 +10,20 @@ class Config:
       raise ValueError("No SECRET_KEY set for Flask application")
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME') 
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_SERVER = 'smtp.gmail.com'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SESSION_COOKIE_SAMESITE = "strict"
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=20)
     REMEMBER_COOKIE_SAMESITE = "strict"
+    CKEDITOR_PKG_TYPE = 'basic'
     REMEMBER_COOKIE_SECURE = True
     ADMIN_USERS = ["admin"]
     
+
     @property
     def DATABASE_URI(self):  # Note: all caps
         return f"mysql://user@{self.DB_SERVER}/foo"

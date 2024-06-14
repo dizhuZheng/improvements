@@ -11,16 +11,17 @@
       {% endfor %}
       <div>my email:
         <address> 
-          <p>{{ current_user.email }}</p>
+          {{ current_user.email }}
         </address>
       </div>
-      {{ current_user.about }}
-      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item" href="{{ url_for('auth_bp.changename') }}">change name</a></li>
-        <li><a class="dropdown-item" href="{{ url_for('auth_bp.change_email') }}">change email</a></li>
-        <li><a class="dropdown-item" href="{{ url_for('auth_bp.change_email') }}">change password</a></li>
-        <li><a class="dropdown-item" href="{{ url_for('auth_bp.change_about') }}">change about</a></li>
+      <h3>{{ current_user.about }}</h3>
+      <ul>
+        <li><a href="{{ url_for('auth_bp.changename') }}">change name</a></li>
+        <li><a href="{{ url_for('auth_bp.change_email') }}">change email</a></li>
+        <li><a href="{{ url_for('auth_bp.change_email') }}">change password</a></li>
+        <li><a href="{{ url_for('auth_bp.change_about') }}">change about</a></li>
       </ul>
+      <h3><a href="{{ url_for('auth_bp.logout') }}">Log out</a></h3>
     </div>
   </div>
 {% endblock %}
