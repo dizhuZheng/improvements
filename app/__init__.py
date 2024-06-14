@@ -15,6 +15,8 @@ from flask_admin.contrib.sqla import ModelView
 import logging
 import signal
 from .background_thread import BackgroundThreadFactory, TASKS_QUEUE
+from flask_cors import CORS
+
 
 logging.basicConfig(level=logging.INFO, force=True)
 
@@ -36,6 +38,7 @@ def create_app(config_name=None):
         config_name = os.getenv('FLASK_ENV', 'development')
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    CORS(app, resources={r'/*': {'origins': '*'}})
     register_extensions(app)
     with app.app_context():
         db.create_all()
