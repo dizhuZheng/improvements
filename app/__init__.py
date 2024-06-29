@@ -36,12 +36,21 @@ def unauthorized(e):
 def create_app(config_name=None):
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="dist/static", template_folder="dist", static_url_path="/static")
     app.config.from_object(config[config_name])
     CORS(app, resources={r'/*': {'origins': '*'}})
     register_extensions(app)
     with app.app_context():
         db.create_all()
+    # sanity check route
+    @app.route('/ping', methods=['GET'])
+    def ping_pong():
+        return jsonify('pong!')
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
+    def index(path):
+        return render_template("base.html")
+
     # @app.route('/task', methods=['POST'])
     # def submit_task():
     #     task = request.json
@@ -93,3 +102,4 @@ def register_extensions(app):
     admin.add_view(ModelView(Role, db.session, category="Manage"))
     admin.add_view(ModelView(User, db.session, category="Manage"))
     
+
